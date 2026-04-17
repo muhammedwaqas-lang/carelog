@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="CareLog" />
+  <meta name="theme-color" content="#007AFF" />
+  <title>CareLog</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════════════════════ HOME ═══════════════════════════════════ -->
+  <div class="screen" id="screen-home">
+    <div class="status-spacer"></div>
+    <div class="screen-body"></div>
+    <div id="home-tabbar"></div>
+  </div>
+
+  <!-- ═══════════════════════════════ NEW APPOINTMENT ════════════════════════ -->
+  <div class="screen" id="screen-new-appointment">
+    <div class="status-spacer"></div>
+    <div class="sub-nav">
+      <button class="back-btn" onclick="goBack()">
+        <svg width="10" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 10 17"><path d="M9 1L1 8.5 9 16"/></svg>
+        Back
+      </button>
+      <span class="screen-title">New Appointment</span>
+      <button class="action-btn" onclick="goToAppointmentPreview()">Next</button>
+    </div>
+    <div class="screen-body" id="appt-form-body">
+
+      <div class="section-label" style="padding-top:8px;">Details</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Child Reference / Name</label>
+          <input id="appt-childref" type="text" placeholder="e.g. #CR-2024 or first name" />
+        </div>
+        <div class="input-row">
+          <label>Date</label>
+          <input id="appt-date" type="date" />
+        </div>
+        <div class="input-row">
+          <label>Time</label>
+          <input id="appt-time" type="time" />
+        </div>
+        <div class="input-row">
+          <label>Visit Type</label>
+          <select id="appt-visittype">
+            <option>Home Visit</option>
+            <option>School Visit</option>
+            <option>Office</option>
+            <option>Virtual</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <label>Location (optional)</label>
+          <input id="appt-location" type="text" placeholder="e.g. Family home, Manchester" />
+        </div>
+      </div>
+
+      <div class="section-label">Session Notes</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>What happened during the session?</label>
+          <textarea id="appt-notes" placeholder="Describe the session, activities, child's engagement..."></textarea>
+        </div>
+      </div>
+
+      <div class="section-label">Wellbeing</div>
+      <div class="card">
+        <div class="flag-row">
+          <div>
+            <div class="flag-label">Physical Wellbeing</div>
+            <div class="flag-sub">Appearance, health, hygiene</div>
+          </div>
+          <select id="appt-physical" style="border:none;color:#007AFF;font-size:15px;font-weight:500;background:transparent;font-family:inherit;outline:none;">
+            <option>Good</option>
+            <option>Concerns</option>
+            <option>N/A</option>
+          </select>
+        </div>
+        <div class="flag-row">
+          <div>
+            <div class="flag-label">Emotional Wellbeing</div>
+            <div class="flag-sub">Mood, behaviour, engagement</div>
+          </div>
+          <select id="appt-emotional" style="border:none;color:#007AFF;font-size:15px;font-weight:500;background:transparent;font-family:inherit;outline:none;">
+            <option>Good</option>
+            <option>Concerns</option>
+            <option>N/A</option>
+          </select>
+        </div>
+        <div class="flag-row">
+          <div>
+            <div class="flag-label">Safeguarding Concern</div>
+            <div class="flag-sub">Any disclosures or concerns</div>
+          </div>
+          <button class="toggle" id="appt-safeguarding" onclick="toggleEl('appt-safeguarding')"></button>
+        </div>
+      </div>
+
+      <div class="section-label">Follow-up</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Actions taken / next steps</label>
+          <textarea id="appt-actions" placeholder="Any referrals, calls made, follow-up required..."></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="goToAppointmentPreview()">Generate Summary →</button>
+      <div style="height:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ APPOINTMENT PREVIEW ═════════════════════════ -->
+  <div class="screen" id="screen-appointment-preview">
+    <div class="status-spacer"></div>
+    <div class="sub-nav">
+      <button class="back-btn" onclick="goBack()">
+        <svg width="10" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 10 17"><path d="M9 1L1 8.5 9 16"/></svg>
+        Edit
+      </button>
+      <span class="screen-title">Summary Preview</span>
+    </div>
+    <div class="screen-body">
+      <div class="section-label" style="padding-top:8px;">WhatsApp Message</div>
+      <div class="preview-box" id="appt-preview-text"></div>
+      <button class="btn btn-whatsapp" onclick="sendWhatsApp()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.1 1.5 5.823L0 24l6.335-1.477A11.955 11.955 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.007-1.374l-.36-.214-3.726.868.936-3.617-.235-.372A9.818 9.818 0 1 1 12 21.818z"/></svg>
+        Send to Manager via WhatsApp
+      </button>
+      <button class="btn btn-secondary" onclick="saveAppointmentOnly()">Save Without Sending</button>
+      <div style="height:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ NEW CONTACT REPORT ══════════════════════════ -->
+  <div class="screen" id="screen-new-contact">
+    <div class="status-spacer"></div>
+    <div class="sub-nav">
+      <button class="back-btn" onclick="goBack()">
+        <svg width="10" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 10 17"><path d="M9 1L1 8.5 9 16"/></svg>
+        Back
+      </button>
+      <span class="screen-title">Contact Report</span>
+      <button class="action-btn orange" onclick="goToContactPreview()">Next</button>
+    </div>
+    <div class="screen-body">
+      <div class="info-banner orange">⚠️ This report is sent to your manager, who will forward it to the parents.</div>
+
+      <div class="section-label">Visit Details</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Parent / Guardian Name</label>
+          <input id="con-parentname" type="text" placeholder="Full name" />
+        </div>
+        <div class="input-row">
+          <label>Child Reference / Name</label>
+          <input id="con-childref" type="text" placeholder="e.g. #CR-2024" />
+        </div>
+        <div class="input-row">
+          <label>Date of Contact</label>
+          <input id="con-date" type="date" />
+        </div>
+        <div class="input-row">
+          <label>Start Time</label>
+          <input id="con-timestart" type="time" />
+        </div>
+        <div class="input-row">
+          <label>End Time</label>
+          <input id="con-timeend" type="time" />
+        </div>
+        <div class="input-row">
+          <label>Visit Type</label>
+          <select id="con-visittype">
+            <option>Supervised Visit</option>
+            <option>Virtual Contact</option>
+            <option>Letterbox</option>
+            <option>Phone Call</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <label>Location</label>
+          <input id="con-location" type="text" placeholder="e.g. Family Contact Centre" />
+        </div>
+        <div class="input-row">
+          <label>Others Present</label>
+          <input id="con-others" type="text" placeholder="e.g. Key worker, observer" />
+        </div>
+      </div>
+
+      <div class="section-label">Observations</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Description of the contact visit</label>
+          <textarea id="con-description" placeholder="Describe what happened during the visit in detail..."></textarea>
+        </div>
+        <div class="input-row">
+          <label>Child's presentation &amp; mood</label>
+          <textarea id="con-childmood" placeholder="How did the child present before, during and after?"></textarea>
+        </div>
+        <div class="input-row">
+          <label>Parent's presentation</label>
+          <textarea id="con-parentpresentation" placeholder="How did the parent present during the visit?"></textarea>
+        </div>
+      </div>
+
+      <div class="section-label">Safeguarding</div>
+      <div class="card">
+        <div class="flag-row">
+          <div class="flag-label">Safeguarding concerns?</div>
+          <button class="toggle" id="con-safeguarding" onclick="toggleEl('con-safeguarding')"></button>
+        </div>
+        <div class="flag-row">
+          <div class="flag-label">Any disclosures made?</div>
+          <button class="toggle" id="con-disclosures" onclick="toggleEl('con-disclosures')"></button>
+        </div>
+        <div class="flag-row">
+          <div class="flag-label">Contact terminated early?</div>
+          <button class="toggle" id="con-terminated" onclick="toggleEl('con-terminated')"></button>
+        </div>
+      </div>
+
+      <div class="section-label">Assessment</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Overall assessment of the contact</label>
+          <textarea id="con-summary" placeholder="Overall summary and recommendation..."></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-orange" onclick="goToContactPreview()">Generate Report →</button>
+      <div style="height:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════ CONTACT REPORT PREVIEW ══════════════════════ -->
+  <div class="screen" id="screen-contact-preview">
+    <div class="status-spacer"></div>
+    <div class="sub-nav">
+      <button class="back-btn" onclick="goBack()">
+        <svg width="10" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 10 17"><path d="M9 1L1 8.5 9 16"/></svg>
+        Edit
+      </button>
+      <span class="screen-title">Report Preview</span>
+    </div>
+    <div class="screen-body">
+      <div class="section-label" style="padding-top:8px;">Word Document Preview</div>
+      <div class="doc-preview" id="doc-preview-inner"></div>
+
+      <button class="btn btn-email" onclick="sendContactEmail()">
+        <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Download .doc &amp; Email Manager
+      </button>
+      <div class="help-text">The report will download to your device.<br/>Attach it to the email that opens.</div>
+      <button class="btn btn-secondary" onclick="saveContactOnly()">Save Without Sending</button>
+      <div style="height:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ HISTORY ═══════════════════════════════ -->
+  <div class="screen" id="screen-history">
+    <div class="status-spacer"></div>
+    <div class="screen-body" id="history-body"></div>
+    <div id="history-tabbar"></div>
+  </div>
+
+  <!-- ════════════════════════════════ SETTINGS ══════════════════════════════ -->
+  <div class="screen" id="screen-settings">
+    <div class="status-spacer"></div>
+    <div class="screen-body">
+      <div class="nav-bar">
+        <h1>Settings</h1>
+      </div>
+
+      <div class="section-label">Your Details</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Your Name</label>
+          <input id="set-name" type="text" placeholder="e.g. Sarah" />
+        </div>
+      </div>
+
+      <div class="section-label">Manager Contact</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Manager's WhatsApp Number</label>
+          <input id="set-whatsapp" type="tel" placeholder="+44 7700 900000" />
+        </div>
+        <div class="input-row">
+          <label>Manager's Email Address</label>
+          <input id="set-email" type="email" placeholder="manager@agency.co.uk" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+
+      <div class="section-label" style="margin-top:8px;">App Info</div>
+      <div class="card">
+        <div class="list-row" style="cursor:default;">
+          <div class="list-row-text">
+            <div class="list-row-title">CareLog</div>
+            <div class="list-row-sub">Version 1.0</div>
+          </div>
+        </div>
+        <div class="list-row" style="cursor:default;">
+          <div class="list-row-text">
+            <div class="list-row-title">Storage</div>
+            <div class="list-row-sub">Stored locally on this device</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:8px;">Danger Zone</div>
+      <button class="btn btn-red" onclick="confirmClearAll()">Delete All Records</button>
+      <div style="height:16px;"></div>
+    </div>
+    <div id="settings-tabbar"></div>
+  </div>
+
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+  // Inject tab bars after DOM ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = (active) => `
+      <div class="tab-bar">
+        <button class="tab ${active==='home'?'active':''}" onclick="go('home')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="tab ${active==='history'?'active':''}" onclick="go('history')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>History</span>
+        </button>
+        <button class="tab ${active==='settings'?'active':''}" onclick="go('settings')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </button>
+      </div>`;
+    document.getElementById('home-tabbar').innerHTML = tabs('home');
+    document.getElementById('history-tabbar').innerHTML = tabs('history');
+    document.getElementById('settings-tabbar').innerHTML = tabs('settings');
+
+    // Init forms
+    document.getElementById('screen-new-appointment').addEventListener('transitionend', initNewAppointment);
+    const origGo = window.go;
+    window.go = function(screenId, push) {
+      origGo(screenId, push);
+      if (screenId === 'new-appointment') initNewAppointment();
+      if (screenId === 'new-contact') initNewContact();
+      if (screenId === 'settings') renderSettings();
+    };
+  });
+</script>
+</body>
+</html>
