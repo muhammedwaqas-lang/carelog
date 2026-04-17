@@ -71,6 +71,7 @@
           <textarea id="appt-notes" placeholder="Describe the session, activities, child's engagement..."></textarea>
         </div>
       </div>
+      <button id="ai-btn-appt-notes" class="btn" style="background:#f2f2f7;color:#5856d6;border:1.5px solid #5856d6;margin-bottom:4px;" onclick="cleanupWithAI('appt-notes','notes')">✨ Clean up with AI</button>
 
       <div class="section-label">Wellbeing</div>
       <div class="card">
@@ -202,15 +203,22 @@
           <label>Description of the contact visit</label>
           <textarea id="con-description" placeholder="Describe what happened during the visit in detail..."></textarea>
         </div>
+      </div>
+      <button id="ai-btn-con-description" class="btn" style="background:#f2f2f7;color:#5856d6;border:1.5px solid #5856d6;margin-bottom:4px;" onclick="cleanupWithAI('con-description','contact')">✨ Clean up with AI</button>
+      <div class="input-group">
         <div class="input-row">
           <label>Child's presentation &amp; mood</label>
           <textarea id="con-childmood" placeholder="How did the child present before, during and after?"></textarea>
         </div>
+      </div>
+      <button id="ai-btn-con-childmood" class="btn" style="background:#f2f2f7;color:#5856d6;border:1.5px solid #5856d6;margin-bottom:4px;" onclick="cleanupWithAI('con-childmood','contact')">✨ Clean up with AI</button>
+      <div class="input-group">
         <div class="input-row">
           <label>Parent's presentation</label>
           <textarea id="con-parentpresentation" placeholder="How did the parent present during the visit?"></textarea>
         </div>
       </div>
+      <button id="ai-btn-con-parentpresentation" class="btn" style="background:#f2f2f7;color:#5856d6;border:1.5px solid #5856d6;margin-bottom:4px;" onclick="cleanupWithAI('con-parentpresentation','contact')">✨ Clean up with AI</button>
 
       <div class="section-label">Safeguarding</div>
       <div class="card">
@@ -297,6 +305,14 @@
         <div class="input-row">
           <label>Manager's Email Address</label>
           <input id="set-email" type="email" placeholder="manager@agency.co.uk" />
+        </div>
+      </div>
+
+      <div class="section-label">AI Features</div>
+      <div class="input-group">
+        <div class="input-row">
+          <label>Gemini API Key</label>
+          <input id="set-apikey" type="password" placeholder="Paste your API key here" />
         </div>
       </div>
 
