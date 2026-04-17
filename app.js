@@ -575,6 +575,7 @@ function renderSettings() {
   document.getElementById('set-name').value = s.name || '';
   document.getElementById('set-whatsapp').value = s.whatsappNumber || '';
   document.getElementById('set-email').value = s.managerEmail || '';
+  document.getElementById('set-apikey').value = s.geminiKey || '';
 }
 
 function saveSettings() {
@@ -582,8 +583,56 @@ function saveSettings() {
     name: document.getElementById('set-name').value,
     whatsappNumber: document.getElementById('set-whatsapp').value,
     managerEmail: document.getElementById('set-email').value,
+    geminiKey: document.getElementById('set-apikey').value,
   });
   showToast('Settings saved');
+}
+
+// ── AI Cleanup ────────────────────────────────
+async function cleanupWithAI(fieldId, context) {
+  const settings = DB.getSettings();
+  const key = settings.geminiKey || '';
+  if (!key) {
+    showToast('Add your Gemini API key in Settings first');
+    return;
+  }
+
+  const text = document.getElementById(fieldId).value.trim();
+  if (!text) { showToast('Nothing to clean up'); return; }
+
+  const btn = document.getElementById('ai-btn-' + fieldId);
+  const original = btn.textContent;
+  btn.textContent = 'Cleaning up...';
+  btn.disabled = true;
+
+  const prompt = context === 'notes'
+    ? `You are a professional child carer. Rewrite the following rough session notes into clear, professional, third-person prose suitable for a formal case record. Keep it factual and concise. Do not add information that isn't there. Return only the rewritten text, nothing else.\n\nNotes: ${text}`
+    : `You are a professional child carer. Rewrite the following rough text into clear, professional prose suitable for a formal contact visit report. Keep it factual, objective and concise. Return only the rewritten text, nothing else.\n\nText: ${text}`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      }
+    );
+    const data = await res.json();
+    if (data.candidates && data.candidates[0]) {
+      document.getElementById(fieldId).value = data.candidates[0].content.parts[0].text.trim();
+      showToast('Notes cleaned up');
+    } else {
+      showToast('AI error — check your API key in Settings');
+    }
+  } catch (e) {
+    showToast('Could not reach AI — check internet connection');
+  } finally {
+    btn.textContent = original;
+    btn.disabled = false;
+  }
 }
 
 function confirmClearAll() {
